@@ -1,6 +1,6 @@
 {
   "name": "pubsubstar",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Short and simple pup sub module with wildcards and async subscribers",
   "main": "index.js",
   "scripts": {

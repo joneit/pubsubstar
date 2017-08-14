@@ -1,18 +1,27 @@
 /**
- * pubsubstar
+ * pubsubstar v1.0.1
  * https://github.com/joneit/pubsubstar.git
  * Created by joneit on 8/13/17.
  */
 
 /**
- * The `subscriptions` hash is created on each context:
- * 1. This object can serve as a context (`pubsubstar.subscribe(...)`, _etc._); or
- * 2. Mix this object into your own object to use your own object's context; or
- * 3. Call each method with `.call` to specify a context.
- *
  * @module
  * @name pubsubstar
+ * @desc Each calling context has its own distinct subscription namespace.
  *
+ * 1. This object can serve as a unified context:
+ * ```js
+ * pubsubstar.subscribe(...);
+ * ```
+ * 2. Mix this object into your own object to use your own object's context:
+ * ```js
+ * Object.assign(myObj, pubsubstar);
+ * myObj.subscribe(...);
+ * ```
+ * 3. Call each method with `.call` to specify a context:
+ * ```js
+ * pubsubstar.subscribe.call(myObj, ...);
+ * ```
  */
 
 
@@ -39,8 +48,19 @@ module.exports = {
             throw new TypeError('Expected subscriber to be a function.');
         }
 
-        var subscriptions = this.subscriptions = this.subscriptions || Object.create(null),
-            subscribers = subscriptions[topic] = subscriptions[topic] || [],
+        /**
+         * @name subscriptions
+         * @memberOf module:pubsubstar
+         * @private
+         * @type {Object}
+         * @summary Subscriptions namespace
+         * @desc Hash of subscribers by topic.
+         * There are distinct "namespaces" for each context.
+         * Created on the context when needed.
+         */
+        var namespace = this._pubsub = this._pubsub || Object.create(null);
+
+        var subscribers = namespace[topic] = namespace[topic] || [],
             subscriberNotFound = subscribers.indexOf(subscriber) < 0;
 
         if (subscriberNotFound) {
@@ -136,8 +156,9 @@ module.exports = {
 
 
 function forEachTopic(topics, fn) {
-    if (!this.subscriptions) {
-        this.subscriptions = Object.create(null);
+    var namespace = this._pubsub;
+    
+    if (!namespace) {
         return;
     }
 
@@ -146,12 +167,12 @@ function forEachTopic(topics, fn) {
         if (typeof topics !== 'string') {
             throw new TypeError('Expected topic to be a string (with optional "*" wildcards) or a regex.');
         }
-        topics = new RegExp('^' + topics.replace(/\*/g, '.*') + '$');
+        topics = new RegExp('^' + topics.replace(/([^\\])\*+/g, '$1.*').replace(/^\*/, '.*') + '$');
     }
 
-    for (var topic in this.subscriptions) {
-        if (topics.test(topic) && this.subscriptions[topic]) {
-            fn.call(this, this.subscriptions[topic], topic, this.subscriptions);
+    for (var topic in namespace) {
+        if (topics.test(topic) && namespace[topic]) {
+            fn.call(this, namespace[topic], topic, namespace);
         }
     }
 }

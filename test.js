@@ -84,7 +84,7 @@ describe('require("pubsubstar")', function() {
             result.indexOf(17).should.be.aboveOrEqual(0);
             result.indexOf(53).should.be.aboveOrEqual(0);
         });
-        it('called topic "*" and 3 subscribers with varied topics, calls all three', function() {
+        it('called with topics === "*" and 3 subscribers of varied topics, calls all three', function() {
             var n = 0;
             pubsubstar.subscribe('abe', function(m) { n += m * 100; });
             pubsubstar.subscribe('ape', function(m) { n += m * 10; });
@@ -92,7 +92,7 @@ describe('require("pubsubstar")', function() {
             pubsubstar.publish('*', 3);
             n.should.equal(333);
         });
-        it('called topic "a*e" and 3 subscribers with varied topics and 1 match, calls just that one', function() {
+        it('called with topics === "a*e" and 3 subscribers of varied topics and 1 match, calls just that one', function() {
             var n = 0;
             pubsubstar.subscribe('abey', function(m) { n += m * 100; });
             pubsubstar.subscribe('ape', function(m) { n += m * 10; });
@@ -100,7 +100,7 @@ describe('require("pubsubstar")', function() {
             pubsubstar.publish('a*e', 3);
             n.should.equal(30);
         });
-        it('called topic "a*" and 3 subscribers with varied topics and 2 matches, calls just those 2', function() {
+        it('called with topics === "a*" and 3 subscribers of varied topics and 2 matches, calls just those 2', function() {
             var n = 0;
             pubsubstar.subscribe('abe', function(m) { n += m * 100; });
             pubsubstar.subscribe('ape', function(m) { n += m * 10; });
@@ -108,7 +108,7 @@ describe('require("pubsubstar")', function() {
             pubsubstar.publish('a*', 3);
             n.should.equal(330);
         });
-        it('called topic /a.e/ and 4 subscribers with varied topics and 3 matches, calls just those 3', function() {
+        it('called with topics === /a.e/ and 4 subscribers of varied topics and 3 matches, calls just those 3', function() {
             var n = 0;
             pubsubstar.subscribe('abe', function(m) { n += m * 100; });
             pubsubstar.subscribe('ape', function(m) { n += m * 10; });
@@ -116,6 +116,14 @@ describe('require("pubsubstar")', function() {
             pubsubstar.subscribe('babe', function(m) { n += m * 1000; });
             pubsubstar.publish(/a.e/, 3);
             n.should.equal(3330);
+        });
+        it('called with "a\\\\*b" (escaped asterisk) and 3 subscribers of varied topics, calls the exact match only', function() {
+            var n = 0;
+            pubsubstar.subscribe('az', function(m) { n += m * 100; });
+            pubsubstar.subscribe('amz', function(m) { n += m * 10; });
+            pubsubstar.subscribe('a*z', function(m) { n += m * 1; });
+            pubsubstar.publish('a\\*z', 3);
+            n.should.equal(3);
         });
         it('with async subscribers (return promises)', function() {
             function spy1(message) { return new Promise(function(resolve) { setTimeout(function() { resolve(17); }, 500); }); }
