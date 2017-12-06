@@ -1,5 +1,5 @@
 /**
- * pubsubstar v1.0.1
+ * pubsubstar v1.0.2
  * https://github.com/joneit/pubsubstar.git
  * Created by joneit on 8/13/17.
  */
@@ -9,16 +9,16 @@
  * @name pubsubstar
  * @desc Each calling context has its own distinct subscription namespace.
  *
- * 1. This object can serve as a unified context:
+ * 1. This object can serve as a global subscription context:
  * ```js
  * pubsubstar.subscribe(...);
  * ```
- * 2. Mix this object into your own object to use your own object's context:
+ * 2. Mix this object into your own object for a local subscription context:
  * ```js
  * Object.assign(myObj, pubsubstar);
  * myObj.subscribe(...);
  * ```
- * 3. Call each method with `.call` to specify a context:
+ * 3. Call each method with `.call` to specify a precise subscription context:
  * ```js
  * pubsubstar.subscribe.call(myObj, ...);
  * ```
@@ -58,9 +58,15 @@ module.exports = {
          * There are distinct "namespaces" for each context.
          * Created on the context when needed.
          */
-        var namespace = this._pubsub = this._pubsub || Object.create(null);
+        if (!this._pubsub) {
+            Object.defineProperty(this, '_pubsub', {
+                enumerable: false, // so Object.assign won't mix it into a local context
+                value: Object.create(null)
+            });
+        }
 
-        var subscribers = namespace[topic] = namespace[topic] || [],
+        var namespace = this._pubsub,
+            subscribers = namespace[topic] = namespace[topic] || [],
             subscriberNotFound = subscribers.indexOf(subscriber) < 0;
 
         if (subscriberNotFound) {
@@ -157,7 +163,7 @@ module.exports = {
 
 function forEachTopic(topics, fn) {
     var namespace = this._pubsub;
-    
+
     if (!namespace) {
         return;
     }
