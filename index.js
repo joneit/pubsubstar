@@ -66,7 +66,7 @@ module.exports = {
         }
 
         var namespace = this._pubsub,
-            subscribers = namespace[topic] = namespace[topic] || [],
+            subscribers = namespace[topic] || (namespace[topic] = []),
             subscriberNotFound = subscribers.indexOf(subscriber) < 0;
 
         if (subscriberNotFound) {
@@ -159,6 +159,17 @@ module.exports = {
     }
 
 };
+
+
+// `mixin` offers alternative method names
+Object.defineProperty(module.exports, 'mixin', {
+    enumerable: false, // so not itself mixed in
+    value: {
+        on: module.exports.subscribe,
+        off: module.exports.unsubscribe,
+        trigger: module.exports.publish
+    }
+});
 
 
 function forEachTopic(topics, fn) {

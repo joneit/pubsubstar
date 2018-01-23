@@ -1,16 +1,20 @@
-Short and simple pup sub module with wildcards and async subscribers
+Short and simple pup sub module
+
+### Features
+* wildcards event string specs
+* async subscribers (see `publish` comment)
 
 ### Syopsis
 
 * `subscribe(topic, subscriber)`
    * Listen for message in sent to `topic`; upon receipt execute `subscriber` with message
-* `unsubscribe(topics, subscriber)`  
+* `unsubscribe(topics, subscriber)`
    * Stop listening for messages sent to `topics` bound to `subscriber`; or
    * Stop listening for messages sent to `topics` bound to any subscriber (`!subscriber`)
    * Stop listening for messages sent to all `topics` bound to any subscribers (`topic === '*' && !subscriber`)
 * `publish(topics, message)`
    * Send `message` to `topics`
-   
+
 #### `topics` parameter
 May be:
 * A string
@@ -19,9 +23,9 @@ May be:
    * Affects all matching _subscriptions_ (subscribed topic strings).
    * Thus `'*'` matches all topics, `'A*y'` matches topics `Any` and `Aunty`, _etc._
    * To match actual occurances of `*` in topic string, escape with `\*`.
-      * Don't forget to escape the backslash in JavaScript string literals! 
+      * Don't forget to escape the backslash in JavaScript string literals!
       * Thus `'abc\\*xyz'` matches topic string `abc*xyz` _only._
-* A `RegExp` 
+* A `RegExp`
    * Affects all matching subscriptions.
    * Surround with `^` and `$` to match to whole topic strings.
 
